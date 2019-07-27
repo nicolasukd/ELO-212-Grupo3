@@ -19,6 +19,8 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+/*display  U1(.digitos(digitos),.an(AN),.sevenSeg({CA,CB,CC,CD,CE,CF,CG}),.clk(clkout),.reset(CPU_RESETN),
+    .d1(SW[15:12]),.d2(SW[11:8]),.d3(4'd0),.d4(respuesta[7:4]),.d5(respuesta[3:0]),.d6(4'd0),.d7(SW[7:4]),.d8(SW[3:0]));*/
 
 module display (
     input logic [7:0]digitos,
@@ -29,7 +31,28 @@ module display (
                 );
     logic [3:0] BCD;
     logic [3:0] count = 4'b0000;
-    BCDto7 U2(.BCD(BCD),.sevenSeg(sevenSeg));
+    always_comb begin
+        case(BCD)
+            4'd0: sevenSeg = ~7'b1111110;
+            4'd1: sevenSeg = ~7'b0110000;
+            4'd2: sevenSeg = ~7'b1101101;
+            4'd3: sevenSeg = ~7'b1111001;
+            4'd4: sevenSeg = ~7'b0110011;
+            4'd5: sevenSeg = ~7'b1011011;
+            4'd6: sevenSeg = ~7'b1011111;
+            4'd7: sevenSeg = ~7'b1110000;
+            4'd8: sevenSeg = ~7'b1111111;
+            4'd9: sevenSeg = ~7'b1111011;
+            4'd10: sevenSeg = ~7'b1110111;
+            4'd11: sevenSeg = ~7'b0011111;
+            4'd12: sevenSeg = ~7'b1001110;
+            4'd13: sevenSeg = ~7'b0111101;
+            4'd14: sevenSeg = ~7'b1001111;
+            4'd15: sevenSeg = ~7'b1000111;
+            default: sevenSeg = 8'd0;
+        endcase
+    end
+    
     
     always_ff @(posedge clk)begin
         if (~reset)
