@@ -23,7 +23,7 @@
 module alu(
     input logic [3:0]botones, // (+,-,and,or)
     input logic [7:0]A,B,
-    output logic [7:0]salida,
+    output logic [10:0]salida,
     output logic invalido
     );
     always_comb begin
@@ -31,16 +31,17 @@ module alu(
             4'b1000:
             begin
                 salida = A+B;
-                if (salida> 8'b11111111)begin
+                if (salida> 8'b11111111)
                     invalido = 0;
-                end
+                else
+                    invalido = 1;
             end
             4'b0100: begin                
                 salida = A-B;
-                if (salida> 8'b11111111)begin
+                if (salida> 8'b11111111)
                     invalido = 0;
-                end
-                
+                else 
+                    invalido = 1;                
              end
             4'b0010: begin
                 salida = A|B;

@@ -20,7 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module display(
+module display (
+    input logic [7:0]digitos,
     input logic clk,reset,
     input logic [3:0]d1,d2,d3,d4,d5,d6,d7,d8,
     output logic [7:0]an,
@@ -36,37 +37,75 @@ module display(
         else
             count <= count + 1;
         case(count) 
-            4'b0001: begin //no debiese ser 4'b0000?
-                    an <= ~8'b10000000;
-                    BCD <= d1;
+            4'b0001: begin 
+                    if(digitos[7]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b10000000;
+                        BCD <= d1;
+                    end
             end
             4'b0010: begin
-                    an <= ~8'b01000000;
-                    BCD <= d2;
+                    if(digitos[6]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b01000000;
+                        BCD <= d2;
+                    end
+                    
             end
             4'b0011: begin
-                    an <= ~8'b00100000;
-                    BCD <= d3;
+                    if(digitos[5]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00100000;
+                        BCD <= d3;
+                    end
+                    
             end
             4'b0100: begin
-                    an <= ~8'b00010000;
-                    BCD <= d4;
+                    if(digitos[4]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00010000;
+                        BCD <= d4;
+                    end
+                    
             end
             4'b0101: begin
-                    an <= ~8'b00001000;
-                    BCD <= d5;
+                    if(digitos[3]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00001000;
+                        BCD <= d5;
+                    end
+                    
             end
             4'b0110: begin
-                    an <= ~8'b00000100;
-                    BCD <= d6;
+                    if(digitos[2]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00000100;
+                        BCD <= d6;
+                    end
+                    
             end
             4'b0111: begin
-                    an <= ~8'b00000010;
-                    BCD <= d7;
+                    if(digitos[1]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00000010;
+                        BCD <= d7;
+                    end
+                    
             end
             4'b1000: begin
-                    an <= ~8'b00000001;
-                    BCD <= d8;
+                    if(digitos[0]==0)
+                        an <= ~8'b00000000;
+                    else begin
+                        an <= ~8'b00000001;
+                        BCD <= d8;
+                    end  
                     count <= 4'b0000;
                     
             end
