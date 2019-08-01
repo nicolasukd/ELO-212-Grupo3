@@ -29,12 +29,13 @@ module Topmodule(
     output logic [15:0]LED
     );
     logic clkout,invalido;
-    logic [10:0]resultado;
+    logic [7:0]resultado;
     logic [7:0]respuesta,digitos;
     logic [3:0]BCD;
     clockdivider #(10000) diez(.clkin(CLK100MHZ),.reset(CPU_RESETN),.clkout(clkout));
     
     alu U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
+    //alubits #(8)U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
     
     
     display  U1(.digitos(digitos),.an(AN),.sevenSeg({CA,CB,CC,CD,CE,CF,CG}),.clk(clkout),.reset(CPU_RESETN),

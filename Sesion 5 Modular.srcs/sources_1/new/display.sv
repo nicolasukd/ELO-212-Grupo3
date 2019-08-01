@@ -31,6 +31,7 @@ module display (
                 );
     logic [3:0] BCD;
     logic [3:0] count = 4'b0000;
+    
     always_comb begin
         case(BCD)
             4'd0: sevenSeg = ~7'b1111110;
