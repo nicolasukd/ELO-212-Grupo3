@@ -34,15 +34,17 @@ module Topmodule(
     logic [3:0]BCD;
     clockdivider #(10000) diez(.clkin(CLK100MHZ),.reset(CPU_RESETN),.clkout(clkout));
     
-    alu U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
-    //alubits #(8)U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
+    //alu U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
+    alubits #(8)U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
     
     
     display  U1(.digitos(digitos),.an(AN),.sevenSeg({CA,CB,CC,CD,CE,CF,CG}),.clk(clkout),.reset(CPU_RESETN),
     .d1(SW[15:12]),.d2(SW[11:8]),.d3(4'd0),.d4(respuesta[7:4]),.d5(respuesta[3:0]),.d6(4'd0),.d7(SW[7:4]),.d8(SW[3:0]));
     
-    always_comb begin
-            
+    always_ff @(posedge CLK100MHZ)begin
+        if (~CPU_RESETN)
+            digitos = 8'd0;
+                    
         if(BTNU == 1 || BTND == 1)begin
             digitos = 8'b11011011;
             respuesta = resultado[7:0];

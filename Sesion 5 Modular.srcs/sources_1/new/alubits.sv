@@ -24,9 +24,10 @@ module alubits #(bits = 16)(
     input logic [3:0]botones, // (+,-,and,or)
     input logic [bits-1:0]A,B,
     output logic [bits:0]salida,
-    output logic invalido
+    output logic invalido,
+    output logic [bits-1:0]over
     );
-    logic over = ~'d0;
+    assign over = ~'d0;
     always_comb begin
         case(botones)
             4'b1000:
