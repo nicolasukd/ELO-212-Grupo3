@@ -22,7 +22,7 @@
 
 module SE1(
     input logic CLK100MHZ,
-    input logic CPU_RESETN,UART_TXD_IN,
+    input logic CPU_RESETN,UART_TXD_IN,UART_RXD_OUT,
     output logic [7:0]AN,
     output logic CA,CB,CC,CD,CE,CF,CG,  
     output logic [11:0]LED,
@@ -30,6 +30,7 @@ module SE1(
     );
     logic [7:0]rx_data,digitos;
     logic rx_ready,clkout,trigger,muestra_resultado;
+    logic tx_start,tx_data;
     
     logic [15:0]op1,op2,op1_d,op2_d,cp1,cp2;
     logic [1:0]cmd;
@@ -52,6 +53,11 @@ module SE1(
     unsigned_to_bcd U4(.clk(CLK100MHZ),.trigger(1),.in(op1),.bcd(op1_d));
     unsigned_to_bcd U5(.clk(CLK100MHZ),.trigger(1),.in(op2),.bcd(op2_d));
     unsigned_to_bcd U6(.clk(CLK100MHZ),.trigger(1),.in(alu_hexa),.bcd(alu_d));
+    
+    tx_control U7(.tx_start(tx_start),.tx_data(tx_data),.dataIn16(alu_hexa),.PB(trigger));
+    
+    
+    uart_basic U8(.clk(CLK100MHZ),.tx(UART_RXD_OUT),.reset(~CPU_RESETN),.tx_data(tx_data),.tx_start(tx_start));
     
    /* always_ff @(posedge CLK100MHZ)begin
          case(muestra_resultado)
