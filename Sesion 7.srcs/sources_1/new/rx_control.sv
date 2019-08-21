@@ -19,16 +19,19 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+//rx_control U0(.clk(CLK100MHZ),.reset(~CPU_RESETN),.rx_ready(BTNC),.rx_in_data(UART_TXD_IN),.rx_out1_data(),.rx_out2_data(),.alu_ctrl(),.leds(LED));
+    
 
 module rx_control(
     input logic clk,reset,rx_ready,
     input logic [7:0]rx_in_data,
     output logic [15:0]rx_out1_data,rx_out2_data,   
     output logic [1:0] alu_ctrl,
-    output logic [7:0]estado 
+    output logic [11:0]leds,
+    output logic trigger, muestra_resultado
     );
-    logic [15:0]op1,op2;
-    logic [1:0]cmd;
+    logic [15:0]op1,op1_next,op2,op2_next;
+    logic [1:0]cmd,cmd_next;
     logic guardar1,guardar2,guardar3;
     //logic PB;
     
@@ -36,34 +39,46 @@ module rx_control(
     
     //PBdebouncer rxready(.clk(clk),.rst(reset),.PB(rx_ready),.PB_pressed_pulse(PB));
     
-    bancoregistros #(16) U0(.guardar(guardar1),.clock(clk),.reset(reset),.entrada(op1),.salida(rx_out1_data),.enable(1'b1));
+    bancoregistros_sin_clk #(16) U0(.guardar(guardar1),.entrada(op1),.salida(rx_out1_data));
+    bancoregistros_sin_clk #(16) U1(.guardar(guardar2),.entrada(op2),.salida(rx_out2_data));
+    bancoregistros_sin_clk #(2) U2(.guardar(guardar3) ,.entrada(cmd),.salida(alu_ctrl));
+    
+    /*bancoregistros #(16) U0(.guardar(guardar1),.clock(clk),.reset(reset),.entrada(op1),.salida(rx_out1_data),.enable(1'b1));
     bancoregistros #(16) U1(.guardar(guardar2),.clock(clk),.reset(reset),.entrada(op2),.salida(rx_out2_data),.enable(1'b1));
-    bancoregistros #(2) U2(.guardar(guardar3),.clock(clk),.reset(reset),.entrada(cmd),.salida(alu_ctrl),.enable(1'b1));
+    bancoregistros #(2) U2(.guardar(guardar3),.clock(clk),.reset(reset),.entrada(cmd),.salida(alu_ctrl),.enable(1'b1));*/
     
     
     
     
-    
-    
-    always_ff @(posedge clk )begin
-    	if(reset)
+    always_ff @(posedge clk, posedge reset)begin
+    	if(reset)begin
     		state <= Wait_OP1_LSB;
+    	end
     	else
     		state <= next_state;
+    		op1<=op1_next;
+    		op2<=op2_next;
+    		cmd<=cmd_next;
     end
     
     
     
     always_comb begin
         next_state = state;
+        op1_next = op1;
+        op2_next = op2;
+    	cmd_next = cmd;
+        guardar1 = 0;
+        guardar2 = 0;
+       guardar3 = 0;
         
         
         case(state)
             Wait_OP1_LSB:begin
-                estado = 8'd1;
-                guardar1 = 0;
-                guardar2 = 0;
-                guardar3 = 0;
+                leds = 12'd1;;
+                trigger = 0;
+                muestra_resultado = 1;
+                
                 if(rx_ready)begin
                     next_state = Store_OP1_LSB; 
    
@@ -73,22 +88,25 @@ module rx_control(
                 end
             end
             Store_OP1_LSB: begin
-                estado = 8'd2;
+                leds = 12'd2;
+                
+                trigger = 0;
+                muestra_resultado = 0;
                 
                 guardar1 = 1;
-                guardar2 = 0;
-                guardar3 = 0;
                 
                 next_state = Wait_OP1_MSB; 
                 
-                op1[7:0] = rx_in_data;                       
+                muestra_resultado = 0;
+                
+                op1_next[7:0] = rx_in_data;                       
             end
             Wait_OP1_MSB: begin
-                estado = 8'd3;
+                leds = 12'd4;
                 
-                guardar1 = 0;
-                guardar2 = 0;
-                guardar3 = 0;
+
+                trigger = 0;
+                muestra_resultado = 0;
                 
                 if(rx_ready)begin
                     next_state = Store_OP1_MSB;    
@@ -98,21 +116,21 @@ module rx_control(
                 end         
             end
             Store_OP1_MSB: begin
-                estado = 8'd4;
+                leds = 12'd8;
+
+                trigger = 0;
+                muestra_resultado = 0;
                 
                 guardar1 = 1;
-                guardar2 = 0;
-                guardar3 = 0;
                 
                 next_state = Wait_OP2_LSB;
-                op1[15:8] = rx_in_data;             
+                op1_next[15:8] = rx_in_data;             
             end
             Wait_OP2_LSB: begin
-                estado = 8'd5;
+                leds = 12'd16;
                 
-                guardar1 = 0;
-                guardar2 = 0;
-                guardar3 = 0;
+                trigger = 0;
+                muestra_resultado = 0;
                 
                 if(rx_ready)begin
                     next_state = Store_OP2_LSB;    
@@ -122,21 +140,23 @@ module rx_control(
                 end
             end
             Store_OP2_LSB: begin
-                estado = 8'd6;
+                leds = 12'd32;
                 
-                guardar1 = 0;
+
+                trigger = 0;
+                muestra_resultado = 0;
+                
                 guardar2 = 1;
-                guardar3 = 0;
+
                 
                 next_state = Wait_OP2_MSB;
-                op2[7:0] = rx_in_data;             
+                op2_next[7:0] = rx_in_data;             
             end
             Wait_OP2_MSB: begin
-                estado = 8'd7;
+                leds = 12'd64;
                 
-                guardar1 = 0;
-                guardar2 = 0;
-                guardar3 = 0;
+                trigger = 0;
+                muestra_resultado = 0;
                 
                 if(rx_ready)begin
                     next_state = Store_OP2_MSB;    
@@ -146,43 +166,73 @@ module rx_control(
                 end   
             end
             Store_OP2_MSB: begin
-                estado = 8'd8;
+                leds = 12'd128;
                 
-                guardar1 = 0;
+
+                trigger = 0;
+                muestra_resultado = 0;
+                
                 guardar2 = 1;
-                guardar3 = 0;
+
                 
                 next_state = Wait_CMD;
-                op2[15:8] = rx_in_data; 
+                op2_next[15:8] = rx_in_data; 
             end
             Wait_CMD: begin
-                estado = 8'd9;
+                leds = 12'd256;
                 
-                guardar1 = 0;
-                guardar2 = 0;
-                guardar3 = 0;
+                trigger = 0;
+                muestra_resultado = 0;
+                
                 
                 if(rx_ready)begin
                     next_state = Store_CMD;    
-                end                        
+                end    
+                else begin
+                    next_state = Wait_CMD;
+                end                     
             end
             Store_CMD:begin
-                estado = 8'd10;
+                leds = 12'd512;
                 
-                guardar1 = 0;
-                guardar2 = 0;
+
+                trigger = 0;
+                
                 guardar3 = 1;
                 
+                muestra_resultado = 1;
+                
                 next_state = Delay_1_cycle;
-                cmd = rx_in_data[1:0];    
+                cmd_next = rx_in_data[1:0];    
             end
             Delay_1_cycle:begin
-                estado = 8'd11;
+                leds = 12'd1024;
+
+                trigger = 0;
+                muestra_resultado = 1;
                 next_state = Trigger_TX_result;    
             end
             Trigger_TX_result:begin
-                estado = 8'd12;
+                leds = 12'd2048;
+  
+                muestra_resultado = 1;
+                
                 next_state = Wait_OP1_LSB;
+                trigger = 1;
+                
+            end
+            default:begin
+                leds = 12'd0;
+                
+                next_state = Wait_OP1_LSB;
+                
+                guardar1 = 0;
+                guardar2 = 0;
+                guardar3 = 0;
+
+                trigger = 0;
+                muestra_resultado = 0;
+                
                 
             end
                      
