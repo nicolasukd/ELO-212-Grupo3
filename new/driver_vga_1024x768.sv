@@ -24,8 +24,8 @@ module driver_vga_1024x768(
 	
 	input clk_vga,                      // 82 MHz !
 	output hs, vs, 
-	output [9:0]hc_visible,
-	output [9:0]vc_visible
+	output [10:0]hc_visible,
+	output [10:0]vc_visible
 	); 
 	
 	logic clk;
