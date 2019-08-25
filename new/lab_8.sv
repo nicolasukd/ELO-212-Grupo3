@@ -134,7 +134,9 @@ module lab_8(
 
    logic [3:0] hold;
    
-   estados instancia(.hold(hold),  .rst((~CPU_RESETN) ||((val == 5'b1_0111 )&& CENTER) || (CENTER && (val == 5'b1_0011) && main_state == 2'b11)), .clk(CLK82MHZ), .trans(CENTER && (val == 5'b1_0011)), .estado(main_state));  //CLR, EXE respectivamente
+   estados instancia(.hold(hold),  .rst((~CPU_RESETN) ||((val == 5'b1_0111 )&& CENTER) || 
+   (CENTER && (val == 5'b1_0011) && main_state == 2'b11)), .clk(CLK82MHZ), .trans(CENTER && (val == 5'b1_0011))
+   , .estado(main_state));  //CLR, EXE respectivamente
     
    logic [15:0] op1_next, op2_next;
    logic [4:0] op_next;
@@ -150,7 +152,7 @@ module lab_8(
         op2_dec <= 'b0;        
         end
         
-    else if (CENTER&& (val == 5'b1_0110) && (main_state == 2'b00))  begin //CE
+    else if (CENTER && (val == 5'b1_0110) && (main_state == 2'b00))  begin //CE
         op1 <= 'b0;
         op2 <= 'b0; 
         op <= 'b0;
@@ -232,11 +234,37 @@ endmodule
  */
 
 module hex_to_ascii(
-    input logic [3:0] hex_num,
-   output logic [7:0] ascii_conv);
-
-    assign ascii_conv = (hex_num < 4'hA)? {4'b0011,hex_num}: {4'b0100,hex_num-4'd9};
-endmodule 
+	input [4:0] hex_num,
+	output logic[7:0] ascii_conv
+	);
+always_comb begin
+      case(hex_num)
+      5'h0: ascii_conv="0";
+      5'h1: ascii_conv="1";
+      5'h2: ascii_conv="2";
+      5'h3: ascii_conv="3";
+      5'h4: ascii_conv="4";
+      5'h5: ascii_conv="5";
+      5'h6: ascii_conv="6";
+      5'h7: ascii_conv="7";
+      5'h8: ascii_conv="8";
+      5'h9: ascii_conv="9";
+      5'hA: ascii_conv="A";
+      5'hB: ascii_conv="B";
+      5'hC: ascii_conv="C";
+      5'hD: ascii_conv="D";
+      5'hE: ascii_conv="E";
+      5'hF: ascii_conv="F";
+      5'b1_0000: ascii_conv="+";//suma
+      5'b1_0001: ascii_conv="*";//mult
+      5'b1_0010: ascii_conv="&";//and
+      5'b1_0100: ascii_conv="-";//re
+      5'b1_0101: ascii_conv="|";//or
+      default: ascii_conv="X";
+      
+      endcase
+      end
+endmodule
 
 
 /**
@@ -250,11 +278,30 @@ endmodule
  *
  */
 module hex_to_bit_ascii(
-	input [3:0] num,
-	output [31:0] bit_ascii
-	);
-
-    assign bit_ascii = {7'b11000,num[3],7'b11000,num[2],7'b11000,num[1],7'b11000,num[0]};
+	input [3:0]num,
+	output logic[4*8-1:0]bit_ascii
+	);  
+	always_comb begin
+	   case(num)
+	   4'h0: bit_ascii="0000";
+	   4'h1: bit_ascii="0001";
+	   4'h2: bit_ascii="0010";
+	   4'h3: bit_ascii="0011";
+	   4'h4: bit_ascii="0100";
+	   4'h5: bit_ascii="0101";
+	   4'h6: bit_ascii="0110";
+	   4'h7: bit_ascii="0111";
+	   4'h8: bit_ascii="1000";
+	   4'h9: bit_ascii="1001";
+	   4'hA: bit_ascii="1010";
+	   4'hB: bit_ascii="1011"; 
+	   4'hC: bit_ascii="1100";
+	   4'hD: bit_ascii="1101";
+	   4'hE: bit_ascii="1110";
+	   4'hF: bit_ascii="1111";
+	   
+	   endcase
+	   end
 	
 endmodule
 
@@ -711,10 +758,10 @@ logic [7:0] modd;
     hex_to_bit_ascii inst_bit_bin1(.num(op_temp[3:0]), .bit_ascii(bit_bin1));		  
 		  
 		  
-	show_one_line #(.LINE_X_LOCATION(10), 
+	show_one_line #(.LINE_X_LOCATION(20), 
                    .LINE_Y_LOCATION(150), 
                    .MAX_CHARACTER_LINE(16), 
-                   .ancho_pixel(8), 
+                   .ancho_pixel(10), 
                    .n(4))
                     
      prueba_conca( .clk(clk_vga), 
@@ -727,7 +774,7 @@ logic [7:0] modd;
                    
                    
                    
-    /*logic [7:0] bit4_op1,bit3_op1,bit2_op1,bit1_op1;
+    logic [7:0] bit4_op1,bit3_op1,bit2_op1,bit1_op1;
     
     logic [31:0] show_op1;
     
@@ -746,55 +793,7 @@ logic [7:0] modd;
 
 
      
-    logic [7:0] bit4_op2,bit3_op2,bit2_op2,bit1_op2;
     
-    logic [31:0] show_op2;
-    
-    logic [15:0] op2_dec;
-    
-    
-    double_dabble dab_op2(.clk(clk_vga), .in(op2), .trigger(mode),.bcd(op2_dec));
-     
-    assign  show_op2 = (mode)? op2_dec: op2;
-    
-    
-     hex_to_ascii inst_bit4_Q2(.hex_num(show_op2[15:12]), .ascii_conv(bit4_op2));
-     hex_to_ascii inst_bit3_Q2(.hex_num(show_op2[11:8]), .ascii_conv(bit3_op2));
-     hex_to_ascii inst_bit2_Q2(.hex_num(show_op2[7:4]), .ascii_conv(bit2_op2));
-     hex_to_ascii inst_bit1_Q2(.hex_num(show_op2[3:0]), .ascii_conv(bit1_op2));
-     
-     assign show_op2 = {bit4_op2 ,bit3_op2, bit2_op2, bit1_op2};
-     
-     
-                            
-    show_one_line #(.LINE_X_LOCATION(10), 
-                    .LINE_Y_LOCATION(250), 
-                    .MAX_CHARACTER_LINE(8), 
-                    .ancho_pixel(2), 
-                    .n(3)) 
-                    
-           ope1(    .clk(clk_vga), 
-                    .rst(rst), 
-                    .hc_visible(hc_visible), 
-                    .vc_visible(vc_visible), 
-                    .the_line({"op1 ",bit4_op1,bit3_op1,bit2_op1,bit1_op1}), 
-                    .in_square(generic_bg[28]), 
-                    .in_character(generic_fg[28])); 
-                
-    //escribir op2
-    show_one_line #(.LINE_X_LOCATION(10), 
-                    .LINE_Y_LOCATION(350), 
-                    .MAX_CHARACTER_LINE(8), 
-                    .ancho_pixel(2), 
-                    .n(3)) 
-           
-           ope2(    .clk(clk_vga), 
-                    .rst(rst), 
-                    .hc_visible(hc_visible), 
-                    .vc_visible(vc_visible), 
-                    .the_line({"op2 ",bit4_op2,bit3_op2,bit2_op2,bit1_op2}), 
-                    .in_square(generic_bg[29]), 
-                    .in_character(generic_fg[29]));*/ 
 	
 
 	
