@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 22.08.2019 15:53:12
+// Create Date: 30.08.2019 12:41:08
 // Design Name: 
 // Module Name: alubits
 // Project Name: 
@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-//alubits #(8)U0(.botones({BTNU,BTND,BTNL,BTNR}),.A(SW[7:0]),.B(SW[15:8]),.salida(resultado),.invalido(invalido));
+
 
 module alubits #(bits = 16)(
     input logic [3:0]botones, // (+,-,and,or)
